@@ -6,6 +6,8 @@ namespace TestTDD;
 [TestClass]
 public class BookTest
 {
+    #region ISBN 10
+
     [DataTestMethod]
     [DataRow("2970154706")]
     [DataRow("3455503950")]
@@ -74,4 +76,51 @@ public class BookTest
 
         Assert.ThrowsException<IsbnKeyException>(() => service.VerifierISBN(isbn));
     }
+
+    #endregion
+
+    #region Book
+
+    [TestMethod]
+    public void whenCreationBook_shouldReturnBook()
+    {
+        Book book = new Book
+        {
+            Isbn = "2267046903",
+            Titre = "Le seigneur des anneaux T3 Le retour du roi",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.Poche
+        };
+
+        _mockBookRepository.Setup(repo => repo.Add(It.IsAny<Book>())).Returns(book);
+
+        Book result = _bookService.CreateBook(book);
+
+        Assert.AreEqual(book, result);
+        //Vérifie que Add a été appelé une fois
+        _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public void whenCreationBookWithEmptyIsbn_shouldReturnBookArgumentException()
+    {
+        Book book = new Book
+        {
+            Isbn = "",
+            Titre = "Le seigneur des anneaux T3 Le retour du roi",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.Poche
+        };
+
+        BookArgumentException exception =
+            Assert.ThrowsException<BookArgumentException>(() => _bookService.CreateBook(book));
+
+        // Vérifie que la méthode Add n'a pas été appelée car une exception a été levée
+        _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Never);
+    }
+
+    #endregion
 }
