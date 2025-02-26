@@ -23,9 +23,9 @@ public class BookTest
     [DataRow("08 04429 57 X")]
     public void whenIsbn10IsValid_shouldReturnTrue(string isbn)
     {
-        var service = new BookService();
+        BookService service = new BookService();
 
-        var result = service.VerifierISBN(isbn);
+        bool result = service.VerifierISBN(isbn);
 
         Assert.IsTrue(result);
     }
@@ -37,9 +37,9 @@ public class BookTest
     [DataRow("201203696X")]
     public void whenIsbn10IsNotValid_shouldReturnFalse(string isbn)
     {
-        var service = new BookService();
+        BookService service = new BookService();
 
-        var result = service.VerifierISBN(isbn);
+        bool result = service.VerifierISBN(isbn);
 
         Assert.IsFalse(result);
     }
@@ -49,7 +49,7 @@ public class BookTest
     [DataRow("29701547081")]
     public void whenIsbn10NotContains10Digits_shouldReturnIsbnLengthException(string isbn)
     {
-        var service = new BookService();
+        BookService service = new BookService();
 
         Assert.ThrowsException<IsbnLengthException>(() => service.VerifierISBN(isbn));
     }
@@ -60,7 +60,7 @@ public class BookTest
     [DataRow("A2901570q6")]
     public void whenIsbn10ContainsLetter_shouldReturnIsbnFormatException(string isbn)
     {
-        var service = new BookService();
+        BookService service = new BookService();
 
         Assert.ThrowsException<IsbnFormatException>(() => service.VerifierISBN(isbn));
     }
@@ -70,7 +70,7 @@ public class BookTest
     [DataRow("345550395j")]
     public void whenIsbn10ContainsKeyLetter_shouldReturnIsbnKeyException(string isbn)
     {
-        var service = new BookService();
+        BookService service = new BookService();
 
         Assert.ThrowsException<IsbnKeyException>(() => service.VerifierISBN(isbn));
     }
