@@ -83,6 +83,8 @@ public class BookTest
 
     #endregion
 
+    #region Book
+
     [TestMethod]
     public void whenCreationBook_shouldReturnBook()
     {
@@ -100,8 +102,36 @@ public class BookTest
         Book result = _bookService.CreateBook(book);
 
         Assert.AreEqual(book, result);
+
         //Vérifie que Add a été appelé une fois
         _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()),
             Times.Once);
     }
+
+    [DataTestMethod]
+    [DataRow("", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Poche)]
+    [DataRow("2267046903", "", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Poche)]
+    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "", "BOURGOIS", BookFormat.Poche)]
+    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "", BookFormat.Poche)]
+    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS")]
+    public void whenCreationBookWithEmptyInformation_shouldReturnBookArgumentException(string isbn, string titre,
+        string auteur, string editeur, BookFormat format)
+    {
+        Book book = new Book
+        {
+            Isbn = isbn,
+            Titre = titre,
+            Auteur = auteur,
+            Editeur = editeur,
+            Format = format
+        };
+
+        BookArgumentException exception =
+            Assert.ThrowsException<BookArgumentException>(() => _bookService.CreateBook(book));
+
+        //Vérifie que la méthode Add n'a pas été appelée
+        _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Never);
+    }
+
+    #endregion
 }
