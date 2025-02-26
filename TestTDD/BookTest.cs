@@ -1,3 +1,5 @@
+using TDD.services;
+
 namespace TestTDD;
 
 [TestClass]
@@ -9,7 +11,7 @@ public class BookTest
         BookService service = new BookService();
         string isbn = "2970154706";
         
-        bool result = service.IsbnVerifier(isbn);
+        bool result = service.VerifierISBN(isbn);
         
         Assert.IsTrue(result);
     }
@@ -20,7 +22,7 @@ public class BookTest
         BookService service = new BookService();
         string isbn = "2970154701";
         
-        bool result = service.IsbnVerifier(isbn);
+        bool result = service.VerifierISBN(isbn);
         
         Assert.IsFalse(result);
     }
