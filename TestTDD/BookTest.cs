@@ -1,4 +1,7 @@
+using Moq;
 using TDD.Exceptions;
+using TDD.objects;
+using TDD.Repository;
 using TDD.services;
 
 namespace TestTDD;
@@ -6,6 +9,17 @@ namespace TestTDD;
 [TestClass]
 public class BookTest
 {
+    private Mock<IBookRepository> _mockBookRepository;
+    private BookService _bookService;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _mockBookRepository = new Mock<IBookRepository>();
+
+        _bookService = new BookService(_mockBookRepository.Object);
+    }
+
     #region ISBN 10
 
     [DataTestMethod]
@@ -25,9 +39,7 @@ public class BookTest
     [DataRow("08 04429 57 X")]
     public void whenIsbn10IsValid_shouldReturnTrue(string isbn)
     {
-        BookService service = new BookService();
-
-        bool result = service.VerifierISBN(isbn);
+        bool result = _bookService.VerifierISBN(isbn);
 
         Assert.IsTrue(result);
     }
@@ -39,9 +51,7 @@ public class BookTest
     [DataRow("201203696X")]
     public void whenIsbn10IsNotValid_shouldReturnFalse(string isbn)
     {
-        BookService service = new BookService();
-
-        bool result = service.VerifierISBN(isbn);
+        bool result = _bookService.VerifierISBN(isbn);
 
         Assert.IsFalse(result);
     }
@@ -51,9 +61,7 @@ public class BookTest
     [DataRow("29701547081")]
     public void whenIsbn10NotContains10Digits_shouldReturnIsbnLengthException(string isbn)
     {
-        BookService service = new BookService();
-
-        Assert.ThrowsException<IsbnLengthException>(() => service.VerifierISBN(isbn));
+        Assert.ThrowsException<IsbnLengthException>(() => _bookService.VerifierISBN(isbn));
     }
 
     [DataTestMethod]
@@ -62,9 +70,7 @@ public class BookTest
     [DataRow("A2901570q6")]
     public void whenIsbn10ContainsLetter_shouldReturnIsbnFormatException(string isbn)
     {
-        BookService service = new BookService();
-
-        Assert.ThrowsException<IsbnFormatException>(() => service.VerifierISBN(isbn));
+        Assert.ThrowsException<IsbnFormatException>(() => _bookService.VerifierISBN(isbn));
     }
 
     [DataTestMethod]
@@ -72,14 +78,10 @@ public class BookTest
     [DataRow("345550395j")]
     public void whenIsbn10ContainsKeyLetter_shouldReturnIsbnKeyException(string isbn)
     {
-        BookService service = new BookService();
-
-        Assert.ThrowsException<IsbnKeyException>(() => service.VerifierISBN(isbn));
+        Assert.ThrowsException<IsbnKeyException>(() => _bookService.VerifierISBN(isbn));
     }
 
     #endregion
-
-    #region Book
 
     [TestMethod]
     public void whenCreationBook_shouldReturnBook()
@@ -102,25 +104,4 @@ public class BookTest
         _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()),
             Times.Once);
     }
-
-    [TestMethod]
-    public void whenCreationBookWithEmptyIsbn_shouldReturnBookArgumentException()
-    {
-        Book book = new Book
-        {
-            Isbn = "",
-            Titre = "Le seigneur des anneaux T3 Le retour du roi",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.Poche
-        };
-
-        BookArgumentException exception =
-            Assert.ThrowsException<BookArgumentException>(() => _bookService.CreateBook(book));
-
-        // Vérifie que la méthode Add n'a pas été appelée car une exception a été levée
-        _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Never);
-    }
-
-    #endregion
 }

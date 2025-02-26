@@ -1,9 +1,18 @@
 using TDD.Exceptions;
+using TDD.objects;
+using TDD.Repository;
 
 namespace TDD.services;
 
 public class BookService
 {
+    private readonly IBookRepository _bookRepository;
+
+    public BookService(IBookRepository bookRepository)
+    {
+        _bookRepository = bookRepository;
+    }
+
     public bool VerifierISBN(string isbn)
     {
         if (isbn.Contains('-') || isbn.Contains(' '))
@@ -12,8 +21,8 @@ public class BookService
         if (isbn.Length != 10)
             throw new IsbnLengthException();
 
-        var somme = 0;
-        for (var i = 0; i < 9; i++)
+        int somme = 0;
+        for (int i = 0; i < 9; i++)
         {
             if (!char.IsDigit(isbn[i]))
                 throw new IsbnFormatException();
@@ -21,7 +30,7 @@ public class BookService
             somme += (isbn[i] - '0') * (i + 1);
         }
 
-        var dernierCaractere = isbn[9];
+        char dernierCaractere = isbn[9];
         int dernierChiffre;
 
         if (dernierCaractere == 'X')
@@ -34,5 +43,20 @@ public class BookService
         somme += dernierChiffre * 10;
 
         return somme % 11 == 0;
+    }
+
+    public Book CreateBook(Book book)
+    {
+        if (string.IsNullOrWhiteSpace(book.Isbn) ||
+            string.IsNullOrWhiteSpace(book.Titre) ||
+            string.IsNullOrWhiteSpace(book.Auteur) ||
+            string.IsNullOrWhiteSpace(book.Editeur) ||
+            !Enum.IsDefined(typeof(BookFormat), book.Format))
+        {
+            throw new BookArgumentException();
+        }
+
+        book.Disponible = true;
+        return _bookRepository.Add(book);
     }
 }

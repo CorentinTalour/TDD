@@ -23,3 +23,11 @@ public class IsbnKeyException : Exception
     {
     }
 }
+
+public class BookArgumentException : Exception
+{
+    public BookArgumentException()
+        : base("Tous les champs sont obligatoires.")
+    {
+    }
+}
