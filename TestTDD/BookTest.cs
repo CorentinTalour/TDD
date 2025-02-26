@@ -113,7 +113,7 @@ public class BookTest
     [DataRow("2267046903", "", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Poche)]
     [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "", "BOURGOIS", BookFormat.Poche)]
     [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "", BookFormat.Poche)]
-    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS")]
+    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS", 999)]
     public void whenCreationBookWithEmptyInformation_shouldReturnBookArgumentException(string isbn, string titre,
         string auteur, string editeur, BookFormat format)
     {
