@@ -13,6 +13,11 @@ namespace TDD.objects
 
         public List<Reservation> Reservations { get; set; } = new List<Reservation>();
 
+        public Adherent()
+        {
+            Reservations = new List<Reservation>();
+        }
+
         public Adherent(string codeAdherent, string nom, string prenom, DateTime dateNaissance, Civilite civilite)
         {
             CodeAdherent = codeAdherent;

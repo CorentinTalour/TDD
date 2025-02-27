@@ -19,7 +19,6 @@ namespace TDD.objects
             if (adherent == null)
                 throw new AdherentNotFoundException();
 
-            // Vérifie que la date est dans la limite des 4 mois
             if (dateLimite < DateTime.Now || dateLimite > DateTime.Now.AddMonths(4))
                 throw new InvalidReservationDateException();
 
