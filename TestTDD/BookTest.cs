@@ -267,5 +267,22 @@ public class BookTest
         _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Once);
     }
 
+    [TestMethod]
+    public void DeleteBook_LivreExistePas_LeveUneException()
+    {
+        string isbn = "2267046903";
+
+        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn))
+            .Returns((Book)null); //Retourne null pour simuler l'absence du livre
+
+        var exception = Assert.ThrowsException<BookNotFoundException>(() => _bookService.DeleteBook(isbn));
+
+        Assert.IsInstanceOfType(exception, typeof(BookNotFoundException));
+
+        _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
+
+        _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Never);
+    }
+
     #endregion
 }
