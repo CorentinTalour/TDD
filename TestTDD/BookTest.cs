@@ -1,3 +1,4 @@
+using System.Collections;
 using Moq;
 using TDD.Exceptions;
 using TDD.objects;
@@ -282,6 +283,118 @@ public class BookTest
         _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
 
         _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Never);
+    }
+
+    [TestMethod]
+    public void SearchBooks_ParIsbn_RetourneLivre()
+    {
+        string isbn = "2267046903";
+        Book expectedBook = new Book
+        {
+            Isbn = isbn,
+            Titre = "Le seigneur des anneaux",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.Poche
+        };
+
+        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(expectedBook);
+
+        IEnumerable<Book> result = _bookService.SearchBooks(isbn: isbn);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(1, result.Count()); //1 livre retourné
+        Assert.AreEqual(expectedBook.Isbn, result.First().Isbn);
+
+        _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
+    }
+
+    [TestMethod]
+    public void SearchBooks_ParTitre_RetourneLivres()
+    {
+        string title = "Le seigneur des anneaux";
+        List<Book> expectedBooks = new List<Book>
+        {
+            new Book
+            {
+                Isbn = "2267046903",
+                Titre = title,
+                Auteur = "J.R.R. Tolkien",
+                Editeur = "BOURGOIS",
+                Format = BookFormat.Poche
+            },
+            new Book
+            {
+                Isbn = "2267046904",
+                Titre = title,
+                Auteur = "J.R.R. Tolkien",
+                Editeur = "BOURGOIS",
+                Format = BookFormat.GrandFormat
+            },
+            new Book
+            {
+                Isbn = "2267046904",
+                Titre = "Bilbo le Hobbit",
+                Auteur = "J.R.R. Tolkien",
+                Editeur = "BOURGOIS",
+                Format = BookFormat.GrandFormat
+            }
+        };
+
+        _mockBookRepository.Setup(repo => repo.GetByTitle(title))
+            .Returns(expectedBooks.Where(book => book.Titre == title).ToList());
+
+        IEnumerable<Book> result = _bookService.SearchBooks(title: title);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count()); //2 livres retournés
+        Assert.AreEqual(expectedBooks.First().Titre, result.First().Titre);
+
+        _mockBookRepository.Verify(repo => repo.GetByTitle(title), Times.Once);
+    }
+
+    [TestMethod]
+    public void SearchBooks_ParAuteur_RetourneLivres()
+    {
+        string author = "J.R.R. Tolkien";
+        List<Book> expectedBooks = new List<Book>
+        {
+            new Book
+            {
+                Isbn = "2267046903",
+                Titre = "Le seigneur des anneaux",
+                Auteur = author,
+                Editeur = "BOURGOIS",
+                Format = BookFormat.Poche
+            },
+            new Book
+            {
+                Isbn = "2267046904",
+                Titre = "Bilbo le Hobbit",
+                Auteur = author,
+                Editeur = "BOURGOIS",
+                Format = BookFormat.GrandFormat
+            },
+            new Book
+            {
+                Isbn = "2267046904",
+                Titre = "Bilbo le Hobbit",
+                Auteur = "OwO",
+                Editeur = "BOURGOIS",
+                Format = BookFormat.GrandFormat
+            }
+        };
+
+        _mockBookRepository.Setup(repo => repo.GetByAuthor(author))
+            .Returns(expectedBooks.Where(book => book.Auteur == author).ToList());
+
+        IEnumerable<Book> result = _bookService.SearchBooks(author: author);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count()); //2 livres retournés
+        Assert.AreEqual(expectedBooks.First().Auteur, result.First().Auteur);
+
+        _mockBookRepository.Verify(repo => repo.GetByAuthor(author), Times.Once);
     }
 
     #endregion
