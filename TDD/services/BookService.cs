@@ -66,7 +66,7 @@ public class BookService
 
         if (existingBook == null)
         {
-            throw new ArgumentException("");
+            throw new BookNotFoundException();
         }
 
         existingBook.Titre = updatedBook.Titre;
