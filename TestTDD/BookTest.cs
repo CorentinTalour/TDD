@@ -245,5 +245,27 @@ public class BookTest
         Assert.ThrowsException<IsbnLengthException>(() => _bookService.ModifyBook(updatedBook));
     }
 
+    [TestMethod]
+    public void SupprimerLivre_LivreExiste_SupprimeLeLivre()
+    {
+        string isbn = "2267046903";
+        Book existingBook = new Book
+        {
+            Isbn = isbn,
+            Titre = "Le seigneur des anneaux T3 Le retour du roi",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.Broché
+        };
+
+        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
+
+        _mockBookRepository.Setup(repo => repo.Delete(isbn)).Verifiable();
+
+        _bookService.Delete(isbn);
+
+        _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Once);
+    }
+
     #endregion
 }
