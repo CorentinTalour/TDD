@@ -229,5 +229,21 @@ public class BookTest
         _mockBookRepository.Verify(repo => repo.Save(existingBook), Times.Once);
     }
 
+    [TestMethod]
+    public async Task ModifierLivre_LivreExistePas_LeveUneException()
+    {
+        string isbn = "2267046903";
+        Book updatedBook = new Book
+        {
+            Isbn = isbn,
+            Titre = "Le seigneur des anneaux T3 La bataille pour la Terre du Milieu",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.GrandFormat
+        };
+
+        Assert.ThrowsException<IsbnLengthException>(() => _bookService.ModifyBook(updatedBook));
+    }
+
     #endregion
 }
