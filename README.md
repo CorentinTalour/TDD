@@ -2,7 +2,7 @@
 
 ## Description
 
-Ce projet implémente des tests unitaires en utilisant .NET et suit les principes du développement piloté par les tests (TDD). Il contient une API, ainsi que des tests unitaires pour valider le bon fonctionnement des fonctionnalités du projet. L'objectif de ce projet est de démontrer une bonne utilisation des tests unitaires et de la gestion des erreurs dans une API .NET.
+Ce projet fait partie d'un cours sur le développement logiciel. Il implémente des tests unitaires en utilisant .NET et suit les principes du développement piloté par les tests (TDD). Ce projet ne contient pas l'API complète mais uniquement la logique métier sous forme de services, de gestion des réservations, des livres et autres entités liées. L'objectif est de démontrer une bonne utilisation des tests unitaires et de la gestion des erreurs dans une logique métier en .NET.
 
 Ce projet utilise GitHub Actions pour l'intégration continue (CI), permettant d'exécuter les tests unitaires à chaque push sur la branche `main`.
 
@@ -18,11 +18,8 @@ Ce projet utilise GitHub Actions pour l'intégration continue (CI), permettant d
 ## Technologies utilisées
 
 - **.NET SDK 8.0** - Framework pour le développement d'applications API et web.
-- **xUnit / MSTest** - Frameworks de tests unitaires utilisés pour effectuer les tests.
+- **MSTest** - Frameworks de tests unitaires utilisés pour effectuer les tests.
 - **GitHub Actions** - CI/CD pour l'exécution des tests à chaque push sur la branche `main`.
-- **PostgreSQL** - Base de données utilisée pour la persistance des données (si applicable).
-- **Entity Framework Core** - ORM pour l'interaction avec la base de données.
-- **Docker** (facultatif) - Pour les configurations de conteneur si nécessaire.
 
 ---
 
