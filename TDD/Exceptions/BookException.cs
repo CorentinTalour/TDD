@@ -35,7 +35,7 @@ public class BookArgumentException : Exception
 public class BookNotFoundException : Exception
 {
     public BookNotFoundException()
-        : base("Impossible de faire la modification le livre n'existe pas.")
+        : base("Le livre n'a pas été trouvé.")
     {
     }
 }

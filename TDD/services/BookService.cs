@@ -87,7 +87,7 @@ public class BookService
         }
         else
         {
-            throw new Exception("");
+            throw new BookNotFoundException();
         }
     }
 }
