@@ -8,6 +8,8 @@ public interface IBookRepository
     Book Modify(Book book);
     Task<Book> Save(Book book);
     Book GetByIsbn(string isbn);
+    IEnumerable<Book> GetByTitle(string title);
+    IEnumerable<Book> GetByAuthor(string author);
     IEnumerable<Book> GetAll();
     void Delete(string isbn);
 }

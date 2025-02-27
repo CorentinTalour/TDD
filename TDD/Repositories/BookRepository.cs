@@ -30,6 +30,16 @@ public class BookRepository : IBookRepository
         return _context.Books.FirstOrDefault(b => b.Isbn == isbn);
     }
 
+    public IEnumerable<Book> GetByTitle(string title)
+    {
+        return _context.Books.Where(b => b.Titre.Contains(title)).ToList();
+    }
+
+    public IEnumerable<Book> GetByAuthor(string author)
+    {
+        return _context.Books.Where(b => b.Auteur.Contains(author)).ToList();
+    }
+
     public IEnumerable<Book> GetAll()
     {
         return _context.Books.ToList();

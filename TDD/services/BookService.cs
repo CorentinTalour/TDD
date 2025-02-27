@@ -90,4 +90,37 @@ public class BookService
             throw new BookNotFoundException();
         }
     }
+
+    public IEnumerable<Book> SearchBooks(string isbn = null, string title = null, string author = null)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(isbn))
+            {
+                if (VerifierISBN(isbn))
+                {
+                    Book book = _bookRepository.GetByIsbn(isbn);
+                    if (book != null) return new List<Book> { book };
+                    else return new List<Book>();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(title))
+            {
+                return _bookRepository.GetByTitle(title) ?? new List<Book>();
+            }
+
+            if (!string.IsNullOrEmpty(author))
+            {
+                return _bookRepository.GetByAuthor(author) ?? new List<Book>();
+            }
+
+            return new List<Book>();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }
