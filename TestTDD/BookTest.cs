@@ -190,5 +190,44 @@ public class BookTest
         mockBookRepository.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
     }
 
+    [TestMethod]
+    public async Task ModifierLivre_LivreExiste_ModifieEtSauvegardeLivre()
+    {
+        string isbn = "2267046903";
+        Book existingBook = new Book
+        {
+            Isbn = isbn,
+            Titre = "Le seigneur des anneaux T3 Le retour du roi",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.Poche
+        };
+
+        Book updatedBook = new Book
+        {
+            Isbn = isbn,
+            Titre = "Le seigneur des anneaux T3 La bataille pour la Terre du Milieu",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.GrandFormat
+        };
+
+        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
+
+        _mockBookRepository.Setup(repo => repo.Save(existingBook)).Returns(Task.FromResult(existingBook));
+
+        Book result = await _bookService.ModifyBook(updatedBook);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(updatedBook.Titre, result.Titre);
+        Assert.AreEqual(updatedBook.Auteur, result.Auteur);
+        Assert.AreEqual(updatedBook.Editeur, result.Editeur);
+        Assert.AreEqual(updatedBook.Format, result.Format);
+
+        _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
+
+        _mockBookRepository.Verify(repo => repo.Save(existingBook), Times.Once);
+    }
+
     #endregion
 }
