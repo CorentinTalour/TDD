@@ -168,5 +168,27 @@ public class BookTest
         mockBookRepository.Verify(repo => repo.Save(livreFromWebService), Times.Once);
     }
 
+    [TestMethod]
+    public async Task CompleterLivreAvecWebService_LivreNonTrouve_LanceException()
+    {
+        Mock<IBookRepository> mockBookRepository = new Mock<IBookRepository>();
+        Mock<IBookWebService> _mockWebServiceClient = new Mock<IBookWebService>();
+        BookWebService bookWebService = new BookWebService(mockBookRepository.Object, _mockWebServiceClient.Object);
+
+        string isbn = "2267046903";
+
+        _mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
+            .ReturnsAsync((Book)null); //Retourne null pour simuler l'absence du livre
+
+        await Assert.ThrowsExceptionAsync<WebServiceDontFindBookByIsbn>(async () =>
+        {
+            await bookWebService.CompleterLivreAvecWebService(isbn);
+        });
+
+        _mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
+
+        mockBookRepository.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
+    }
+
     #endregion
 }
