@@ -11,27 +11,30 @@ public class BookRepository : IBookRepository
         _context = context;
     }
 
-    // Ajouter un livre
     public Book Add(Book book)
     {
-        _context.Books.Add(book); // Ajoute le livre à la base de données
-        _context.SaveChanges(); // Sauvegarde les changements
-        return book; // Retourne le livre ajouté
+        _context.Books.Add(book);
+        _context.SaveChanges();
+        return book;
     }
 
-    // Récupérer un livre par son ISBN
+    public Book Modify(Book book)
+    {
+        _context.Books.Update(book);
+        _context.SaveChanges();
+        return book;
+    }
+
     public Book GetByIsbn(string isbn)
     {
         return _context.Books.FirstOrDefault(b => b.Isbn == isbn);
     }
 
-    // Récupérer tous les livres
     public IEnumerable<Book> GetAll()
     {
         return _context.Books.ToList();
     }
 
-    // Supprimer un livre par son ISBN
     public void Delete(string isbn)
     {
         var book = _context.Books.FirstOrDefault(b => b.Isbn == isbn);

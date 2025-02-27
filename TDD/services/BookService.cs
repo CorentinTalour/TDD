@@ -59,4 +59,21 @@ public class BookService
         book.Disponible = true;
         return _bookRepository.Add(book);
     }
+
+    public async Task<Book> ModifyBook(Book updatedBook)
+    {
+        Book existingBook = _bookRepository.GetByIsbn(updatedBook.Isbn);
+
+        if (existingBook == null)
+        {
+            throw new ArgumentException("");
+        }
+
+        existingBook.Titre = updatedBook.Titre;
+        existingBook.Auteur = updatedBook.Auteur;
+        existingBook.Editeur = updatedBook.Editeur;
+        existingBook.Format = updatedBook.Format;
+
+        return await _bookRepository.Save(existingBook);
+    }
 }
