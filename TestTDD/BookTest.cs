@@ -1,7 +1,7 @@
 using Moq;
 using TDD.Exceptions;
 using TDD.objects;
-using TDD.Repository;
+using TDD.Repositories;
 using TDD.services;
 
 namespace TestTDD;
@@ -131,6 +131,41 @@ public class BookTest
 
         //Vérifie que la méthode Add n'a pas été appelée
         _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task CompleterLivreAvecWebService_LivreExiste_SauvegardeLivre()
+    {
+        Mock<IBookRepository> mockBookRepository;
+        Mock<IBookWebService> mockWebServiceClient;
+        BookWebService bookWebService;
+
+        mockBookRepository = new Mock<IBookRepository>();
+        mockWebServiceClient = new Mock<IBookWebService>();
+        bookWebService = new BookWebService(mockBookRepository.Object, mockWebServiceClient.Object);
+
+        string isbn = "2267046903";
+        Book livreFromWebService = new Book
+        {
+            Isbn = isbn,
+            Titre = "Le seigneur des anneaux T3 Le retour du roi",
+            Auteur = "J.R.R. Tolkien",
+            Editeur = "BOURGOIS",
+            Format = BookFormat.GrandFormat,
+        };
+
+        mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
+            .Returns(Task.FromResult(livreFromWebService));
+
+        mockBookRepository.Setup(repo => repo.Save(livreFromWebService))
+            .Returns(Task.FromResult(livreFromWebService));
+
+        Book result = await bookWebService.CompleterLivreAvecWebService(isbn);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(isbn, result.Isbn);
+        mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
+        mockBookRepository.Verify(repo => repo.Save(livreFromWebService), Times.Once);
     }
 
     #endregion
