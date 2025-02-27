@@ -1,6 +1,6 @@
 using TDD.objects;
 
-namespace TDD.Repository;
+namespace TDD.Repositories;
 
 public class BookRepository : IBookRepository
 {
@@ -40,5 +40,12 @@ public class BookRepository : IBookRepository
             _context.Books.Remove(book);
             _context.SaveChanges();
         }
+    }
+
+    public async Task<Book> Save(Book book)
+    {
+        _context.Books.Update(book);
+        await _context.SaveChangesAsync();
+        return book;
     }
 }

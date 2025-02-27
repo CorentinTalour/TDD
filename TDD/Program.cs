@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TDD.Repository;
+using TDD.Repositories;
 using TDD.services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +10,12 @@ builder.Services.AddDbContext<DbContext>(options =>
         builder.Configuration
             .GetConnectionString("DefaultConnection"))); // Assure-toi d'avoir la bonne configuration de base de données
 
-builder.Services.AddScoped<IBookRepository, BookRepository>(); // Injection du BookRepository
-builder.Services.AddScoped<BookService>(); // Injection du BookService
+builder.Services.AddHttpClient<IBookWebService, BookWebServiceClient>();
+
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<IBookWebService, BookWebServiceClient>();
+builder.Services.AddScoped<BookWebService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
