@@ -106,4 +106,37 @@ public class ReservationTest
 
         Assert.IsTrue(output.ToString().Contains("Envoi d'un rappel pour les réservations suivantes"));
     }
+
+    [TestMethod]
+    [ExpectedException(typeof(AdherentNotFoundException))]
+    public void AjouterReservation_AdherentNull_ThrowsAdherentNotFoundException()
+    {
+        _reservationService.AjouterReservation(null, DateTime.Now.AddDays(10));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(InvalidReservationDateException))]
+    public void AjouterReservation_DateLimiteInvalide_ThrowsInvalidReservationDateException()
+    {
+        Adherent adherent = new Adherent { CodeAdherent = "A001", Reservations = new List<Reservation>() };
+
+        _reservationService.AjouterReservation(adherent, DateTime.Now.AddMonths(5));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ReservationLimitExceededException))]
+    public void AjouterReservation_LimiteDeReservationAtteinte_ThrowsReservationLimitExceededException()
+    {
+        Adherent adherent = new Adherent { CodeAdherent = "A001" };
+
+        _mockAdherentRepository
+            .Setup(repo => repo.GetReservationsOuvertes(adherent.CodeAdherent))
+            .Returns(new List<Reservation>
+            {
+                new Reservation(adherent, DateTime.Now), new Reservation(adherent, DateTime.Now),
+                new Reservation(adherent, DateTime.Now)
+            });
+
+        _reservationService.AjouterReservation(adherent, DateTime.Now.AddDays(10));
+    }
 }
