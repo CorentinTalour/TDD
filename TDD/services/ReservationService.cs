@@ -1,3 +1,4 @@
+using TDD.Exceptions;
 using TDD.Repositories;
 
 namespace TDD.objects
@@ -15,14 +16,19 @@ namespace TDD.objects
 
         public string AjouterReservation(Adherent adherent, DateTime dateLimite)
         {
-            // Si l'adhérent a déjà 3 réservations ouvertes, on empêche l'ajout
-            if (_adherentRepository.GetReservationsOuvertes(adherent.CodeAdherent).Count >= 3)
-            {
-                return "Limite de 3 réservations ouvertes atteinte.";
-            }
+            if (adherent == null)
+                throw new AdherentNotFoundException();
 
-            // Créer une nouvelle réservation
-            var reservation = new Reservation(adherent, dateLimite);
+            // Vérifie que la date est dans la limite des 4 mois
+            if (dateLimite < DateTime.Now || dateLimite > DateTime.Now.AddMonths(4))
+                throw new InvalidReservationDateException();
+
+            //Si l'adhérent a déjà 3 réservations ouvertes, on empêche l'ajout
+            if (_adherentRepository.GetReservationsOuvertes(adherent.CodeAdherent).Count >= 3)
+                throw new ReservationLimitExceededException();
+
+
+            Reservation reservation = new Reservation(adherent, dateLimite);
             _reservationRepository.Add(reservation);
 
             return "Réservation ajoutée avec succès.";
@@ -30,19 +36,23 @@ namespace TDD.objects
 
         public List<Reservation> GetReservationsOuvertes()
         {
-            // Retourne toutes les réservations non-clôturées
             return _reservationRepository.GetReservationsOuvertes();
         }
 
         public void EnvoyerRappel(Adherent adherent)
         {
-            var reservationsDepassees = _adherentRepository.GetReservationsDepassees(adherent.CodeAdherent);
+            List<Reservation> reservationsDepassees =
+                _adherentRepository.GetReservationsDepassees(adherent.CodeAdherent);
+
+            if (adherent == null)
+                throw new AdherentNotFoundException();
 
             if (reservationsDepassees.Any())
             {
-                // Simule l'envoi d'un email (ici simplement un log console pour le test)
+                //Simule l'envoi d'un email (ici simplement un log console pour le test)
                 Console.WriteLine(
-                    $"Envoi d'un rappel pour les réservations suivantes : {string.Join(", ", reservationsDepassees.Select(r => r.CodeReservation))}");
+                    $"Envoi d'un rappel pour les réservations suivantes : {string.Join(", ",
+                        reservationsDepassees.Select(r => r.CodeReservation))}");
             }
         }
     }
