@@ -37,7 +37,7 @@ public class BookRepository : IBookRepository
 
     public void Delete(string isbn)
     {
-        var book = _context.Books.FirstOrDefault(b => b.Isbn == isbn);
+        Book? book = _context.Books.FirstOrDefault(b => b.Isbn == isbn);
         if (book != null)
         {
             _context.Books.Remove(book);

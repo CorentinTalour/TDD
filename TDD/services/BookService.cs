@@ -76,4 +76,18 @@ public class BookService
 
         return await _bookRepository.Save(existingBook);
     }
+
+    public void DeleteBook(string isbn)
+    {
+        Book? book = _bookRepository.GetByIsbn(isbn);
+
+        if (book != null)
+        {
+            _bookRepository.Delete(isbn);
+        }
+        else
+        {
+            throw new Exception("");
+        }
+    }
 }

@@ -262,7 +262,7 @@ public class BookTest
 
         _mockBookRepository.Setup(repo => repo.Delete(isbn)).Verifiable();
 
-        _bookService.Delete(isbn);
+        _bookService.DeleteBook(isbn);
 
         _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Once);
     }
