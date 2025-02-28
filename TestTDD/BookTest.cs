@@ -13,76 +13,19 @@ public class BookTest
     private Mock<IBookRepository> _mockBookRepository;
     private BookService _bookService;
 
+    private Mock<IBookWebService> _mockWebServiceClient;
+    private BookWebService _bookWebService;
+
     [TestInitialize]
     public void Setup()
     {
         _mockBookRepository = new Mock<IBookRepository>();
-
         _bookService = new BookService(_mockBookRepository.Object);
+
+        _mockWebServiceClient = new Mock<IBookWebService>();
+        _bookWebService = new BookWebService(_mockBookRepository.Object, _mockWebServiceClient.Object);
     }
 
-    #region ISBN 10
-
-    [DataTestMethod]
-    [DataRow("2970154706")]
-    [DataRow("3455503950")]
-    [DataRow("2012036961")]
-    [DataRow("080442957X")]
-    //Test avec tiret
-    [DataRow("2-970154706")]
-    [DataRow("345550395-0")]
-    [DataRow("201-2036961")]
-    [DataRow("0-8044-2957-X")]
-    //Test avec espace
-    [DataRow("2 970154706")]
-    [DataRow("345550 3950")]
-    [DataRow("2012 036961")]
-    [DataRow("08 04429 57 X")]
-    public void whenIsbn10IsValid_shouldReturnTrue(string isbn)
-    {
-        bool result = _bookService.VerifierISBN(isbn);
-
-        Assert.IsTrue(result);
-    }
-
-    [DataTestMethod]
-    [DataRow("2970154707")]
-    [DataRow("3455503959")]
-    [DataRow("2012036968")]
-    [DataRow("201203696X")]
-    public void whenIsbn10IsNotValid_shouldReturnFalse(string isbn)
-    {
-        bool result = _bookService.VerifierISBN(isbn);
-
-        Assert.IsFalse(result);
-    }
-
-    [DataTestMethod]
-    [DataRow("297015470")]
-    [DataRow("29701547081")]
-    public void whenIsbn10NotContains10Digits_shouldReturnIsbnLengthException(string isbn)
-    {
-        Assert.ThrowsException<IsbnLengthException>(() => _bookService.VerifierISBN(isbn));
-    }
-
-    [DataTestMethod]
-    [DataRow("297R154701")]
-    [DataRow("29d015g706")]
-    [DataRow("A2901570q6")]
-    public void whenIsbn10ContainsLetter_shouldReturnIsbnFormatException(string isbn)
-    {
-        Assert.ThrowsException<IsbnFormatException>(() => _bookService.VerifierISBN(isbn));
-    }
-
-    [DataTestMethod]
-    [DataRow("297015470R")]
-    [DataRow("345550395j")]
-    public void whenIsbn10ContainsKeyLetter_shouldReturnIsbnKeyException(string isbn)
-    {
-        Assert.ThrowsException<IsbnKeyException>(() => _bookService.VerifierISBN(isbn));
-    }
-
-    #endregion
 
     #region Book
 
@@ -137,14 +80,6 @@ public class BookTest
     [TestMethod]
     public async Task CompleterLivreAvecWebService_LivreExiste_SauvegardeLivre()
     {
-        Mock<IBookRepository> mockBookRepository;
-        Mock<IBookWebService> mockWebServiceClient;
-        BookWebService bookWebService;
-
-        mockBookRepository = new Mock<IBookRepository>();
-        mockWebServiceClient = new Mock<IBookWebService>();
-        bookWebService = new BookWebService(mockBookRepository.Object, mockWebServiceClient.Object);
-
         string isbn = "2267046903";
         Book livreFromWebService = new Book
         {
@@ -155,27 +90,23 @@ public class BookTest
             Format = BookFormat.GrandFormat,
         };
 
-        mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
+        _mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
             .Returns(Task.FromResult(livreFromWebService));
 
-        mockBookRepository.Setup(repo => repo.Save(livreFromWebService))
+        _mockBookRepository.Setup(repo => repo.Save(livreFromWebService))
             .Returns(Task.FromResult(livreFromWebService));
 
-        Book result = await bookWebService.CompleterLivreAvecWebService(isbn);
+        Book result = await _bookWebService.CompleterLivreAvecWebService(isbn);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(isbn, result.Isbn);
-        mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
-        mockBookRepository.Verify(repo => repo.Save(livreFromWebService), Times.Once);
+        _mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
+        _mockBookRepository.Verify(repo => repo.Save(livreFromWebService), Times.Once);
     }
 
     [TestMethod]
     public async Task CompleterLivreAvecWebService_LivreNonTrouve_LanceException()
     {
-        Mock<IBookRepository> mockBookRepository = new Mock<IBookRepository>();
-        Mock<IBookWebService> _mockWebServiceClient = new Mock<IBookWebService>();
-        BookWebService bookWebService = new BookWebService(mockBookRepository.Object, _mockWebServiceClient.Object);
-
         string isbn = "2267046903";
 
         _mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
@@ -183,12 +114,12 @@ public class BookTest
 
         await Assert.ThrowsExceptionAsync<WebServiceDontFindBookByIsbn>(async () =>
         {
-            await bookWebService.CompleterLivreAvecWebService(isbn);
+            await _bookWebService.CompleterLivreAvecWebService(isbn);
         });
 
         _mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
 
-        mockBookRepository.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
+        _mockBookRepository.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
     }
 
     [TestMethod]
@@ -399,3 +330,81 @@ public class BookTest
 
     #endregion
 }
+
+#region ISBN 10
+
+[TestClass]
+public class ISBN10
+{
+    private Mock<IBookRepository> _mockBookRepository;
+    private BookService _bookService;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _mockBookRepository = new Mock<IBookRepository>();
+
+        _bookService = new BookService(_mockBookRepository.Object);
+    }
+
+    [DataTestMethod]
+    [DataRow("2970154706")]
+    [DataRow("3455503950")]
+    [DataRow("2012036961")]
+    [DataRow("080442957X")]
+    //Test avec tiret
+    [DataRow("2-970154706")]
+    [DataRow("345550395-0")]
+    [DataRow("201-2036961")]
+    [DataRow("0-8044-2957-X")]
+    //Test avec espace
+    [DataRow("2 970154706")]
+    [DataRow("345550 3950")]
+    [DataRow("2012 036961")]
+    [DataRow("08 04429 57 X")]
+    public void whenIsbn10IsValid_shouldReturnTrue(string isbn)
+    {
+        bool result = _bookService.VerifierISBN(isbn);
+
+        Assert.IsTrue(result);
+    }
+
+    [DataTestMethod]
+    [DataRow("2970154707")]
+    [DataRow("3455503959")]
+    [DataRow("2012036968")]
+    [DataRow("201203696X")]
+    public void whenIsbn10IsNotValid_shouldReturnFalse(string isbn)
+    {
+        bool result = _bookService.VerifierISBN(isbn);
+
+        Assert.IsFalse(result);
+    }
+
+    [DataTestMethod]
+    [DataRow("297015470")]
+    [DataRow("29701547081")]
+    public void whenIsbn10NotContains10Digits_shouldReturnIsbnLengthException(string isbn)
+    {
+        Assert.ThrowsException<IsbnLengthException>(() => _bookService.VerifierISBN(isbn));
+    }
+
+    [DataTestMethod]
+    [DataRow("297R154701")]
+    [DataRow("29d015g706")]
+    [DataRow("A2901570q6")]
+    public void whenIsbn10ContainsLetter_shouldReturnIsbnFormatException(string isbn)
+    {
+        Assert.ThrowsException<IsbnFormatException>(() => _bookService.VerifierISBN(isbn));
+    }
+
+    [DataTestMethod]
+    [DataRow("297015470R")]
+    [DataRow("345550395j")]
+    public void whenIsbn10ContainsKeyLetter_shouldReturnIsbnKeyException(string isbn)
+    {
+        Assert.ThrowsException<IsbnKeyException>(() => _bookService.VerifierISBN(isbn));
+    }
+}
+
+#endregion
