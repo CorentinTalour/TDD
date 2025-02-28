@@ -1,5 +1,6 @@
 using TDD.Exceptions;
 using TDD.Repositories;
+using TDD.Repositories.Interfaces;
 
 namespace TDD.objects
 {
@@ -17,7 +18,7 @@ namespace TDD.objects
         public string AddReservation(Member member, DateTime limitDate)
         {
             if (member == null)
-                throw new AdherentNotFoundException();
+                throw new MemberNotFoundException();
 
             if (limitDate < DateTime.Now || limitDate > DateTime.Now.AddMonths(4))
                 throw new InvalidReservationDateException();
@@ -44,7 +45,7 @@ namespace TDD.objects
                 _memberRepository.GetReservationsDepassees(member.MemberCode);
 
             if (member == null)
-                throw new AdherentNotFoundException();
+                throw new MemberNotFoundException();
 
             if (overdueReservations.Any())
             {

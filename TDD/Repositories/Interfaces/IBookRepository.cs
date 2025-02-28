@@ -1,6 +1,6 @@
 using TDD.objects;
 
-namespace TDD.Repositories;
+namespace TDD.Repositories.Interfaces;
 
 public interface IBookRepository
 {

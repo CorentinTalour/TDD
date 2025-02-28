@@ -1,6 +1,7 @@
 using TDD.objects;
+using TDD.Repositories.Interfaces;
 
-namespace TDD.Repositories;
+namespace TDD.Repositories.Implementations;
 
 public class BookRepository : IBookRepository
 {

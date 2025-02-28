@@ -2,6 +2,7 @@ using Moq;
 using TDD.Exceptions;
 using TDD.objects;
 using TDD.Repositories;
+using TDD.Repositories.Interfaces;
 
 namespace TestTDD;
 
@@ -85,7 +86,7 @@ public class ReservationTest
     [TestMethod]
     public void GivenNullMember_WhenAddingReservation_ShouldThrowAdherentNotFoundException()
     {
-        Assert.ThrowsException<AdherentNotFoundException>(() =>
+        Assert.ThrowsException<MemberNotFoundException>(() =>
             _reservationService.AddReservation(null, DateTime.Now.AddDays(10))
         );
     }

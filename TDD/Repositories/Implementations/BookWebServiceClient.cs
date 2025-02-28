@@ -1,9 +1,8 @@
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using TDD.objects;
+using TDD.Repositories.Interfaces;
 
-namespace TDD.Repositories
+namespace TDD.Repositories.Implementations
 {
     public class BookWebServiceClient : IBookWebService
     {

@@ -8,9 +8,9 @@ public class ReservationLimitExceededException : Exception
     }
 }
 
-public class AdherentNotFoundException : Exception
+public class MemberNotFoundException : Exception
 {
-    public AdherentNotFoundException()
+    public MemberNotFoundException()
         : base("L'adhérent n'a pas été trouvé.")
     {
     }

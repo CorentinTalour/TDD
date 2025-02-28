@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TDD.Repositories;
+using TDD.Repositories.Implementations;
+using TDD.Repositories.Interfaces;
 using TDD.services;
 
 var builder = WebApplication.CreateBuilder(args);
