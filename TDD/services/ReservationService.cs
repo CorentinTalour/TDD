@@ -46,7 +46,6 @@ namespace TDD.services
 
             List<Reservation> overdueReservations = _memberRepository.GetReservationsDepassees(member.MemberCode);
 
-            // 🛠 Filtre uniquement les réservations ayant plus de 4 mois de retard
             List<Reservation> overdueForFourMonths = overdueReservations
                 .Where(r => r.ReservationDate <= DateTime.Now.AddMonths(-4))
                 .ToList();
