@@ -1,8 +1,6 @@
-using System.Collections;
 using Moq;
 using TDD.Exceptions;
-using TDD.objects;
-using TDD.Repositories;
+using TDD.Models;
 using TDD.Repositories.Interfaces;
 using TDD.services;
 
@@ -11,11 +9,11 @@ namespace TestTDD;
 [TestClass]
 public class BookTest
 {
-    private Mock<IBookRepository> _mockBookRepository;
-    private BookService _bookService;
+    private Mock<IBookRepository>? _mockBookRepository;
+    private BookService? _bookService;
 
-    private Mock<IBookWebService> _mockWebServiceClient;
-    private BookWebService _bookWebService;
+    private Mock<IBookWebService>? _mockWebServiceClient;
+    private BookWebService? _bookWebService;
 
     [TestInitialize]
     public void Setup()
@@ -42,14 +40,14 @@ public class BookTest
             Format = BookFormat.Paperback
         };
 
-        _mockBookRepository.Setup(repo => repo.Add(It.IsAny<Book>())).Returns(book);
+        _mockBookRepository?.Setup(repo => repo.Add(It.IsAny<Book>())).Returns(book);
 
-        Book result = _bookService.CreateBook(book);
+        Book? result = _bookService?.CreateBook(book);
 
         Assert.AreEqual(book, result);
 
         //Vérifie que Add a été appelé une fois
-        _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()),
+        _mockBookRepository?.Verify(repo => repo.Add(It.IsAny<Book>()),
             Times.Once);
     }
 
@@ -72,10 +70,10 @@ public class BookTest
         };
 
         BookArgumentException exception =
-            Assert.ThrowsException<BookArgumentException>(() => _bookService.CreateBook(book));
+            Assert.ThrowsException<BookArgumentException>(() => _bookService?.CreateBook(book));
 
         //Vérifie que la méthode Add n'a pas été appelée
-        _mockBookRepository.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Never);
+        _mockBookRepository?.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Never);
     }
 
     [TestMethod]
@@ -91,18 +89,18 @@ public class BookTest
             Format = BookFormat.LargeFormat,
         };
 
-        _mockWebServiceClient.Setup(client => client.FindBookByIsbn(isbn))
+        _mockWebServiceClient?.Setup(client => client.FindBookByIsbn(isbn))
             .Returns(Task.FromResult(bookFromWebService));
 
-        _mockBookRepository.Setup(repo => repo.Save(bookFromWebService))
+        _mockBookRepository?.Setup(repo => repo.Save(bookFromWebService))
             .Returns(Task.FromResult(bookFromWebService));
 
-        Book result = await _bookWebService.CompleteBookWithWebService(isbn);
+        Book? result = await _bookWebService?.CompleteBookWithWebService(isbn);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(isbn, result.Isbn);
-        _mockWebServiceClient.Verify(client => client.FindBookByIsbn(isbn), Times.Once);
-        _mockBookRepository.Verify(repo => repo.Save(bookFromWebService), Times.Once);
+        _mockWebServiceClient?.Verify(client => client.FindBookByIsbn(isbn), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.Save(bookFromWebService), Times.Once);
     }
 
     [TestMethod]
@@ -110,7 +108,7 @@ public class BookTest
     {
         string isbn = "2267046903";
 
-        _mockWebServiceClient.Setup(client => client.FindBookByIsbn(isbn))
+        _mockWebServiceClient?.Setup(client => client.FindBookByIsbn(isbn))
             .ReturnsAsync((Book)null); //Retourne null pour simuler l'absence du livre
 
         await Assert.ThrowsExceptionAsync<WebServiceDontFindBookByIsbn>(async () =>
@@ -118,9 +116,9 @@ public class BookTest
             await _bookWebService.CompleteBookWithWebService(isbn);
         });
 
-        _mockWebServiceClient.Verify(client => client.FindBookByIsbn(isbn), Times.Once);
+        _mockWebServiceClient?.Verify(client => client.FindBookByIsbn(isbn), Times.Once);
 
-        _mockBookRepository.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
+        _mockBookRepository?.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
     }
 
     [TestMethod]
@@ -145,11 +143,11 @@ public class BookTest
             Format = BookFormat.LargeFormat
         };
 
-        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
+        _mockBookRepository?.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
 
-        _mockBookRepository.Setup(repo => repo.Save(existingBook)).Returns(Task.FromResult(existingBook));
+        _mockBookRepository?.Setup(repo => repo.Save(existingBook)).Returns(Task.FromResult(existingBook));
 
-        Book result = await _bookService.ModifyBook(updatedBook);
+        Book? result = await _bookService?.ModifyBook(updatedBook);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(updatedBook.Title, result.Title);
@@ -157,9 +155,9 @@ public class BookTest
         Assert.AreEqual(updatedBook.Publisher, result.Publisher);
         Assert.AreEqual(updatedBook.Format, result.Format);
 
-        _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
 
-        _mockBookRepository.Verify(repo => repo.Save(existingBook), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.Save(existingBook), Times.Once);
     }
 
     // [TestMethod]
@@ -191,11 +189,11 @@ public class BookTest
             Format = BookFormat.Hardcover
         };
 
-        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
+        _mockBookRepository?.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
 
-        _mockBookRepository.Setup(repo => repo.Delete(isbn)).Verifiable();
+        _mockBookRepository?.Setup(repo => repo.Delete(isbn)).Verifiable();
 
-        _bookService.DeleteBook(isbn);
+        _bookService?.DeleteBook(isbn);
 
         _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Once);
     }
@@ -205,16 +203,16 @@ public class BookTest
     {
         string isbn = "2267046903";
 
-        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn))
+        _mockBookRepository?.Setup(repo => repo.GetByIsbn(isbn))
             .Returns((Book)null); //Retourne null pour simuler l'absence du livre
 
-        var exception = Assert.ThrowsException<BookNotFoundException>(() => _bookService.DeleteBook(isbn));
+        var exception = Assert.ThrowsException<BookNotFoundException>(() => _bookService?.DeleteBook(isbn));
 
         Assert.IsInstanceOfType(exception, typeof(BookNotFoundException));
 
-        _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
 
-        _mockBookRepository.Verify(repo => repo.Delete(isbn), Times.Never);
+        _mockBookRepository?.Verify(repo => repo.Delete(isbn), Times.Never);
     }
 
     [TestMethod]
@@ -230,15 +228,15 @@ public class BookTest
             Format = BookFormat.Paperback
         };
 
-        _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(expectedBook);
+        _mockBookRepository?.Setup(repo => repo.GetByIsbn(isbn)).Returns(expectedBook);
 
-        IEnumerable<Book> result = _bookService.SearchBooks(isbn: isbn);
+        IEnumerable<Book>? result = _bookService?.SearchBooks(isbn: isbn);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(1, result.Count()); //1 livre retourné
         Assert.AreEqual(expectedBook.Isbn, result.First().Isbn);
 
-        _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
     }
 
     [TestMethod]
@@ -273,16 +271,16 @@ public class BookTest
             }
         };
 
-        _mockBookRepository.Setup(repo => repo.GetByTitle(title))
+        _mockBookRepository?.Setup(repo => repo.GetByTitle(title))
             .Returns(expectedBooks.Where(book => book.Title == title).ToList());
 
-        IEnumerable<Book> result = _bookService.SearchBooks(title: title);
+        IEnumerable<Book>? result = _bookService?.SearchBooks(title: title);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count()); //2 livres retournés
         Assert.AreEqual(expectedBooks.First().Title, result.First().Title);
 
-        _mockBookRepository.Verify(repo => repo.GetByTitle(title), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.GetByTitle(title), Times.Once);
     }
 
     [TestMethod]
@@ -317,16 +315,16 @@ public class BookTest
             }
         };
 
-        _mockBookRepository.Setup(repo => repo.GetByAuthor(author))
+        _mockBookRepository?.Setup(repo => repo.GetByAuthor(author))
             .Returns(expectedBooks.Where(book => book.Author == author).ToList());
 
-        IEnumerable<Book> result = _bookService.SearchBooks(author: author);
+        IEnumerable<Book>? result = _bookService?.SearchBooks(author: author);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count()); //2 livres retournés
         Assert.AreEqual(expectedBooks.First().Author, result.First().Author);
 
-        _mockBookRepository.Verify(repo => repo.GetByAuthor(author), Times.Once);
+        _mockBookRepository?.Verify(repo => repo.GetByAuthor(author), Times.Once);
     }
 
     #endregion
@@ -337,8 +335,8 @@ public class BookTest
 [TestClass]
 public class Isbn10Test
 {
-    private Mock<IBookRepository> _mockBookRepository;
-    private BookService _bookService;
+    private Mock<IBookRepository>? _mockBookRepository;
+    private BookService? _bookService;
 
     [TestInitialize]
     public void Setup()
@@ -365,7 +363,7 @@ public class Isbn10Test
     [DataRow("08 04429 57 X")]
     public void GivenValidIsbn10_WhenChecked_ShouldReturnTrue(string isbn)
     {
-        bool result = _bookService.CheckISBN(isbn);
+        bool? result = _bookService?.CheckIsbn(isbn);
 
         Assert.IsTrue(result);
     }
@@ -377,7 +375,7 @@ public class Isbn10Test
     [DataRow("201203696X")]
     public void GivenInvalidIsbn10_WhenChecked_ShouldReturnFalse(string isbn)
     {
-        bool result = _bookService.CheckISBN(isbn);
+        bool? result = _bookService?.CheckIsbn(isbn);
 
         Assert.IsFalse(result);
     }
@@ -387,7 +385,7 @@ public class Isbn10Test
     [DataRow("29701547081")]
     public void GivenIsbn10WithIncorrectLength_WhenChecked_ShouldThrowIsbnLengthException(string isbn)
     {
-        Assert.ThrowsException<IsbnLengthException>(() => _bookService.CheckISBN(isbn));
+        Assert.ThrowsException<IsbnLengthException>(() => _bookService?.CheckIsbn(isbn));
     }
 
     [DataTestMethod]
@@ -396,7 +394,7 @@ public class Isbn10Test
     [DataRow("A2901570q6")]
     public void GivenIsbn10WithLetters_WhenChecked_ShouldThrowIsbnFormatException(string isbn)
     {
-        Assert.ThrowsException<IsbnFormatException>(() => _bookService.CheckISBN(isbn));
+        Assert.ThrowsException<IsbnFormatException>(() => _bookService?.CheckIsbn(isbn));
     }
 
     [DataTestMethod]
@@ -404,7 +402,7 @@ public class Isbn10Test
     [DataRow("345550395j")]
     public void GivenIsbn10WithInvalidKeyLetter_WhenChecked_ShouldThrowIsbnKeyException(string isbn)
     {
-        Assert.ThrowsException<IsbnKeyException>(() => _bookService.CheckISBN(isbn));
+        Assert.ThrowsException<IsbnKeyException>(() => _bookService?.CheckIsbn(isbn));
     }
 }
 

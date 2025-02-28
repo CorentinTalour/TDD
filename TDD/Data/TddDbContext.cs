@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TDD.objects;
+using TDD.Models;
 
-namespace TDD;
+namespace TDD.Data;
 
 public class TddDbContext : DbContext
 {

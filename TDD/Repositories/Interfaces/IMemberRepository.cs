@@ -1,4 +1,4 @@
-using TDD.objects;
+using TDD.Models;
 
 namespace TDD.Repositories.Interfaces;
 

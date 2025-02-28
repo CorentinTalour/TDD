@@ -1,6 +1,4 @@
-using System;
-
-namespace TDD.objects
+namespace TDD.Models
 {
     public class Reservation
     {

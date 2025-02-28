@@ -1,8 +1,8 @@
 using TDD.Exceptions;
-using TDD.Repositories;
+using TDD.Models;
 using TDD.Repositories.Interfaces;
 
-namespace TDD.objects
+namespace TDD.services
 {
     public class ReservationService
     {

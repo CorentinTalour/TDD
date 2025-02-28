@@ -1,6 +1,5 @@
 using TDD.Exceptions;
-using TDD.objects;
-using TDD.Repositories;
+using TDD.Models;
 using TDD.Repositories.Interfaces;
 
 namespace TDD.services;
@@ -18,7 +17,7 @@ public class BookWebService
 
     public async Task<Book> CompleteBookWithWebService(string isbn)
     {
-        Book bookFind = await _bookWebService.FindBookByIsbn(isbn);
+        Book? bookFind = await _bookWebService.FindBookByIsbn(isbn);
         if (bookFind == null)
         {
             throw new WebServiceDontFindBookByIsbn();

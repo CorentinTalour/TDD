@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-
-namespace TDD.objects
+namespace TDD.Models
 {
     public class Member
     {

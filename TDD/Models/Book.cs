@@ -1,11 +1,13 @@
-namespace TDD.objects;
+using System.ComponentModel.DataAnnotations;
+
+namespace TDD.Models;
 
 public class Book
 {
-    public required string Isbn { get; set; }
-    public required string Title { get; set; }
-    public required string Author { get; set; }
-    public required string Publisher { get; set; }
+    [MaxLength(255)] public required string Isbn { get; set; }
+    [MaxLength(255)] public required string Title { get; set; }
+    [MaxLength(255)] public required string Author { get; set; }
+    [MaxLength(255)] public required string Publisher { get; set; }
     public required BookFormat Format { get; set; }
     public bool Available { get; set; } = true;
 }

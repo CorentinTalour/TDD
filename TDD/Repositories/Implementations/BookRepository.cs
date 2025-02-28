@@ -1,4 +1,5 @@
-using TDD.objects;
+using TDD.Data;
+using TDD.Models;
 using TDD.Repositories.Interfaces;
 
 namespace TDD.Repositories.Implementations;
@@ -26,7 +27,7 @@ public class BookRepository : IBookRepository
         return book;
     }
 
-    public Book GetByIsbn(string isbn)
+    public Book? GetByIsbn(string isbn)
     {
         return _context.Books.FirstOrDefault(b => b.Isbn == isbn);
     }

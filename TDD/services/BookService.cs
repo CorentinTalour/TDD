@@ -1,6 +1,5 @@
 using TDD.Exceptions;
-using TDD.objects;
-using TDD.Repositories;
+using TDD.Models;
 using TDD.Repositories.Interfaces;
 
 namespace TDD.services;
@@ -14,7 +13,7 @@ public class BookService
         _bookRepository = bookRepository;
     }
 
-    public bool CheckISBN(string isbn)
+    public bool CheckIsbn(string isbn)
     {
         if (isbn.Contains('-') || isbn.Contains(' '))
             isbn = isbn.Replace("-", "").Replace(" ", "");
@@ -22,13 +21,13 @@ public class BookService
         if (isbn.Length != 10)
             throw new IsbnLengthException();
 
-        int Sum = 0;
+        int sum = 0;
         for (int i = 0; i < 9; i++)
         {
             if (!char.IsDigit(isbn[i]))
                 throw new IsbnFormatException();
 
-            Sum += (isbn[i] - '0') * (i + 1);
+            sum += (isbn[i] - '0') * (i + 1);
         }
 
         char lastCharacter = isbn[9];
@@ -41,9 +40,9 @@ public class BookService
         else
             throw new IsbnKeyException();
 
-        Sum += lastDigit * 10;
+        sum += lastDigit * 10;
 
-        return Sum % 11 == 0;
+        return sum % 11 == 0;
     }
 
     public Book CreateBook(Book book)
@@ -63,7 +62,7 @@ public class BookService
 
     public async Task<Book> ModifyBook(Book updatedBook)
     {
-        Book existingBook = _bookRepository.GetByIsbn(updatedBook.Isbn);
+        Book? existingBook = _bookRepository.GetByIsbn(updatedBook.Isbn);
 
         if (existingBook == null)
         {
@@ -92,15 +91,15 @@ public class BookService
         }
     }
 
-    public IEnumerable<Book> SearchBooks(string isbn = null, string title = null, string author = null)
+    public IEnumerable<Book> SearchBooks(string? isbn = null, string? title = null, string? author = null)
     {
         try
         {
             if (!string.IsNullOrEmpty(isbn))
             {
-                if (CheckISBN(isbn))
+                if (CheckIsbn(isbn))
                 {
-                    Book book = _bookRepository.GetByIsbn(isbn);
+                    Book? book = _bookRepository.GetByIsbn(isbn);
                     if (book != null) return new List<Book> { book };
                     else return new List<Book>();
                 }
@@ -108,12 +107,12 @@ public class BookService
 
             if (!string.IsNullOrEmpty(title))
             {
-                return _bookRepository.GetByTitle(title) ?? new List<Book>();
+                return _bookRepository.GetByTitle(title);
             }
 
             if (!string.IsNullOrEmpty(author))
             {
-                return _bookRepository.GetByAuthor(author) ?? new List<Book>();
+                return _bookRepository.GetByAuthor(author);
             }
 
             return new List<Book>();
