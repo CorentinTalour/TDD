@@ -62,25 +62,51 @@ public class ReservationTest
     }
 
     [TestMethod]
-    public void GivenMemberWithExpiredReservations_WhenSendingReminder_ShouldSendEmail()
+    public void GivenMemberWithOverdueReservations_WhenSendingReminder_ShouldSendEmail()
     {
         Member member = new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
         List<Reservation> reservationsDepassees = new List<Reservation>
         {
-            new Reservation(member, DateTime.Now.AddDays(-1))
+            new Reservation(member, DateTime.Now.AddMonths(-5)) { ReservationCode = "RES001" }
         };
 
         _mockAdherentRepository?.Setup(repo => repo.GetReservationsDepassees(member.MemberCode))
             .Returns(reservationsDepassees);
 
-        //Capture la sortie console pour vérifier l'envoi de l'email
+        //Capture la sortie console
         StringWriter output = new StringWriter();
         Console.SetOut(output);
 
         _reservationService?.SendReminder(member);
 
-        Assert.IsTrue(output.ToString().Contains("Envoi d'un rappel pour les réservations suivantes"));
+        string consoleOutput = output.ToString();
+
+        Assert.IsTrue(consoleOutput.Contains("Envoi d'un rappel pour les réservations suivantes : RES001"));
+    }
+
+    [TestMethod]
+    public void GivenMemberWithRecentOverdueReservations_WhenSendingReminder_ShouldNotSendEmail()
+    {
+        Member member = new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
+
+        List<Reservation> reservationsDepassees = new List<Reservation>
+        {
+            new Reservation(member, DateTime.Now.AddMonths(-3)) { ReservationCode = "RES002" }
+        };
+
+        _mockAdherentRepository?.Setup(repo => repo.GetReservationsDepassees(member.MemberCode))
+            .Returns(reservationsDepassees);
+
+        //Capture la sortie console
+        StringWriter output = new StringWriter();
+        Console.SetOut(output);
+
+        _reservationService?.SendReminder(member);
+
+        string consoleOutput = output.ToString();
+
+        Assert.IsFalse(consoleOutput.Contains("Envoi d'un rappel"));
     }
 
     [TestMethod]
