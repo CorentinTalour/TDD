@@ -1,4 +1,6 @@
-namespace TDD.objects
+using TDD.objects;
+
+namespace TDD.Repositories
 {
     public interface IReservationRepository
     {

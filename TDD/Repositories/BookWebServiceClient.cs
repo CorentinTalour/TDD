@@ -14,7 +14,7 @@ namespace TDD.Repositories
             _httpClient = httpClient;
         }
 
-        public async Task<Book> RechercherLivreParIsbn(string isbn)
+        public async Task<Book> FindBookByIsbn(string isbn)
         {
             HttpResponseMessage response = await _httpClient.GetAsync($"https://api.example.com/livres/{isbn}");
 

@@ -4,5 +4,5 @@ namespace TDD.Repositories;
 
 public interface IBookWebService
 {
-    Task<Book> RechercherLivreParIsbn(string isbn);
+    Task<Book> FindBookByIsbn(string isbn);
 }

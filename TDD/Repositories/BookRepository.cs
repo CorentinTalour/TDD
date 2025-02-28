@@ -32,12 +32,12 @@ public class BookRepository : IBookRepository
 
     public IEnumerable<Book> GetByTitle(string title)
     {
-        return _context.Books.Where(b => b.Titre.Contains(title)).ToList();
+        return _context.Books.Where(b => b.Title.Contains(title)).ToList();
     }
 
     public IEnumerable<Book> GetByAuthor(string author)
     {
-        return _context.Books.Where(b => b.Auteur.Contains(author)).ToList();
+        return _context.Books.Where(b => b.Author.Contains(author)).ToList();
     }
 
     public IEnumerable<Book> GetAll()

@@ -4,18 +4,18 @@ namespace TDD.objects
 {
     public class Reservation
     {
-        public string CodeReservation { get; set; }
-        public Adherent Adherent { get; set; }
-        public DateTime DateReservation { get; set; }
-        public DateTime DateLimite { get; set; }
-        public bool EstCloturee { get; set; }
+        public string ReservationCode { get; set; }
+        public Member Member { get; set; }
+        public DateTime ReservationDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public bool IsClosed { get; set; }
 
-        public Reservation(Adherent adherent, DateTime dateLimite)
+        public Reservation(Member member, DateTime dueDate)
         {
-            Adherent = adherent;
-            DateReservation = DateTime.Now;
-            DateLimite = dateLimite;
-            EstCloturee = false;
+            Member = member;
+            ReservationDate = DateTime.Now;
+            DueDate = dueDate;
+            IsClosed = false;
         }
     }
 }

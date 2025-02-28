@@ -2,9 +2,9 @@ using TDD.objects;
 
 namespace TDD.Repositories;
 
-public interface IAdherentRepository
+public interface IMemberRepository
 {
-    Adherent GetById(int adherentId);
+    Member GetById(int adherentId);
     List<Reservation> GetReservationsOuvertes(string adherentId);
     List<Reservation> GetReservationsDepassees(string adherentId);
 }

@@ -4,5 +4,5 @@ namespace TDD.Repositories;
 
 public interface IWebServiceClient
 {
-    Book RechercherLivreParIsbn(string isbn);
+    Book SearchBookByIsbn(string isbn);
 }

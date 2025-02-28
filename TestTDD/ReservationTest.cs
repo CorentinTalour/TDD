@@ -10,51 +10,31 @@ public class ReservationTest
 {
     private Mock<IReservationRepository> _mockReservationRepository;
     private ReservationService _reservationService;
-    private Mock<IAdherentRepository> _mockAdherentRepository;
+    private Mock<IMemberRepository> _mockAdherentRepository;
 
     [TestInitialize]
     public void Setup()
     {
         _mockReservationRepository = new Mock<IReservationRepository>();
-        _mockAdherentRepository = new Mock<IAdherentRepository>();
+        _mockAdherentRepository = new Mock<IMemberRepository>();
         _reservationService = new ReservationService(_mockReservationRepository.Object, _mockAdherentRepository.Object);
     }
 
     [TestMethod]
-    public void AjouterReservation_LimiteAtteinte_LèveException()
+    public void GivenMemberWithAvailableSlots_WhenAddingReservation_ShouldAddReservationSuccessfully()
     {
-        Adherent adherent = new Adherent("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
+        Member member = new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
-        _mockAdherentRepository.Setup(repo => repo.GetReservationsOuvertes(adherent.CodeAdherent))
+        _mockAdherentRepository.Setup(repo => repo.GetReservationsOuvertes(member.MemberCode))
             .Returns(new List<Reservation>
             {
-                new Reservation(adherent, DateTime.Now.AddMonths(1)),
-                new Reservation(adherent, DateTime.Now.AddMonths(1)),
-                new Reservation(adherent, DateTime.Now.AddMonths(1))
-            });
-
-        new ReservationService(_mockReservationRepository.Object, _mockAdherentRepository.Object);
-
-        Assert.ThrowsException<ReservationLimitExceededException>(() =>
-            _reservationService.AjouterReservation(adherent, DateTime.Now.AddMonths(2))
-        );
-    }
-
-    [TestMethod]
-    public void AjouterReservation_LimiteNonAtteinte_AjouteReservationAvecSucces()
-    {
-        Adherent adherent = new Adherent("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
-
-        _mockAdherentRepository.Setup(repo => repo.GetReservationsOuvertes(adherent.CodeAdherent))
-            .Returns(new List<Reservation>
-            {
-                new Reservation(adherent, DateTime.Now.AddMonths(1)),
-                new Reservation(adherent, DateTime.Now.AddMonths(1))
+                new Reservation(member, DateTime.Now.AddMonths(1)),
+                new Reservation(member, DateTime.Now.AddMonths(1))
             });
 
         _mockReservationRepository.Setup(repo => repo.Add(It.IsAny<Reservation>()));
 
-        string result = _reservationService.AjouterReservation(adherent, DateTime.Now.AddMonths(2));
+        string result = _reservationService.AddReservation(member, DateTime.Now.AddMonths(2));
 
         Assert.AreEqual("Réservation ajoutée avec succès.", result);
         _mockReservationRepository.Verify(repo => repo.Add(It.IsAny<Reservation>()), Times.Once);
@@ -62,80 +42,80 @@ public class ReservationTest
 
 
     [TestMethod]
-    public void GetReservationsOuvertes_RetourneListeReservationsNonCloturees()
+    public void GivenReservationsInSystem_WhenGettingOpenReservations_ShouldReturnListOfOpenReservations()
     {
         List<Reservation> reservations = new List<Reservation>
         {
-            new Reservation(new Adherent("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur),
+            new Reservation(new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur),
                 DateTime.Now.AddMonths(1)),
-            new Reservation(new Adherent("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur),
+            new Reservation(new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur),
                 DateTime.Now.AddMonths(2))
         };
 
         _mockReservationRepository.Setup(repo => repo.GetReservationsOuvertes()).Returns(reservations);
 
-        List<Reservation> result = _reservationService.GetReservationsOuvertes();
+        List<Reservation> result = _reservationService.GetOpenReservations();
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count);
     }
 
     [TestMethod]
-    public void EnvoyerRappel_AdherentAvecReservationsDepassees_EnvoiEmail()
+    public void GivenMemberWithExpiredReservations_WhenSendingReminder_ShouldSendEmail()
     {
-        Adherent adherent = new Adherent("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
+        Member member = new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
         List<Reservation> reservationsDepassees = new List<Reservation>
         {
-            new Reservation(adherent, DateTime.Now.AddDays(-1))
+            new Reservation(member, DateTime.Now.AddDays(-1))
         };
 
-        _mockAdherentRepository.Setup(repo => repo.GetReservationsDepassees(adherent.CodeAdherent))
+        _mockAdherentRepository.Setup(repo => repo.GetReservationsDepassees(member.MemberCode))
             .Returns(reservationsDepassees);
 
         //Capture la sortie console pour vérifier l'envoi de l'email
         StringWriter output = new StringWriter();
         Console.SetOut(output);
 
-        _reservationService.EnvoyerRappel(adherent);
+        _reservationService.SendReminder(member);
 
         Assert.IsTrue(output.ToString().Contains("Envoi d'un rappel pour les réservations suivantes"));
     }
 
     [TestMethod]
-    public void AjouterReservation_AdherentNull_ThrowsAdherentNotFoundException()
+    public void GivenNullMember_WhenAddingReservation_ShouldThrowAdherentNotFoundException()
     {
         Assert.ThrowsException<AdherentNotFoundException>(() =>
-            _reservationService.AjouterReservation(null, DateTime.Now.AddDays(10))
+            _reservationService.AddReservation(null, DateTime.Now.AddDays(10))
         );
     }
 
     [TestMethod]
-    public void AjouterReservation_DateLimiteInvalide_ThrowsInvalidReservationDateException()
+    public void GivenMemberWithInvalidReservationDate_WhenAddingReservation_ShouldThrowInvalidReservationDateException()
     {
-        Adherent adherent = new Adherent("A001", "John", "Doe", DateTime.Now, Civilite.Monsieur);
+        Member member = new Member("A001", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
         Assert.ThrowsException<InvalidReservationDateException>(() =>
-            _reservationService.AjouterReservation(adherent,
+            _reservationService.AddReservation(member,
                 DateTime.Now.AddMonths(5))
         );
     }
 
     [TestMethod]
-    public void AjouterReservation_LimiteDeReservationAtteinte_ThrowsReservationLimitExceededException()
+    public void GivenMemberWithMaxReservations_WhenAddingReservation_ShouldThrowReservationLimitExceededException()
     {
-        Adherent adherent = new Adherent("A001", "John", "Doe", DateTime.Now, Civilite.Monsieur);
+        Member member = new Member("A001", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
-        _mockAdherentRepository.Setup(repo => repo.GetReservationsOuvertes(adherent.CodeAdherent))
+        _mockAdherentRepository.Setup(repo => repo.GetReservationsOuvertes(member.MemberCode))
             .Returns(new List<Reservation>
             {
-                new Reservation(adherent, DateTime.Now.AddMonths(1)),
-                new Reservation(adherent, DateTime.Now.AddMonths(1)),
-                new Reservation(adherent, DateTime.Now.AddMonths(1))
+                new Reservation(member, DateTime.Now.AddMonths(1)),
+                new Reservation(member, DateTime.Now.AddMonths(1)),
+                new Reservation(member, DateTime.Now.AddMonths(1))
             });
 
         Assert.ThrowsException<ReservationLimitExceededException>(() =>
-            _reservationService.AjouterReservation(adherent, DateTime.Now.AddDays(10))
+            _reservationService.AddReservation(member, DateTime.Now.AddDays(10))
         );
     }
 }

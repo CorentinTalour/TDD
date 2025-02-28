@@ -30,15 +30,15 @@ public class BookTest
     #region Book
 
     [TestMethod]
-    public void whenCreationBook_shouldReturnBook()
+    public void CreateBook_ShouldReturnBook()
     {
         Book book = new Book
         {
             Isbn = "2267046903",
-            Titre = "Le seigneur des anneaux T3 Le retour du roi",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.Poche
+            Title = "Le seigneur des anneaux T3 Le retour du roi",
+            Author = "J.R.R. Tolkien",
+            Publisher = "BOURGOIS",
+            Format = BookFormat.Paperback
         };
 
         _mockBookRepository.Setup(repo => repo.Add(It.IsAny<Book>())).Returns(book);
@@ -53,20 +53,20 @@ public class BookTest
     }
 
     [DataTestMethod]
-    [DataRow("", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Poche)]
-    [DataRow("2267046903", "", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Poche)]
-    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "", "BOURGOIS", BookFormat.Poche)]
-    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "", BookFormat.Poche)]
+    [DataRow("", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Paperback)]
+    [DataRow("2267046903", "", "J.R.R. Tolkien", "BOURGOIS", BookFormat.Paperback)]
+    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "", "BOURGOIS", BookFormat.Paperback)]
+    [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "", BookFormat.Paperback)]
     [DataRow("2267046903", "Le seigneur des anneaux T3 Le retour du roi", "J.R.R. Tolkien", "BOURGOIS", 999)]
-    public void whenCreationBookWithEmptyInformation_shouldReturnBookArgumentException(string isbn, string titre,
-        string auteur, string editeur, BookFormat format)
+    public void CreateBook_WithEmptyInformation_ShouldThrowBookArgumentException(string isbn, string title,
+        string author, string publisher, BookFormat format)
     {
         Book book = new Book
         {
             Isbn = isbn,
-            Titre = titre,
-            Auteur = auteur,
-            Editeur = editeur,
+            Title = title,
+            Author = author,
+            Publisher = publisher,
             Format = format
         };
 
@@ -78,70 +78,70 @@ public class BookTest
     }
 
     [TestMethod]
-    public async Task CompleterLivreAvecWebService_LivreExiste_SauvegardeLivre()
+    public async Task CompleteBookWithWebService_BookExists_ShouldSaveBook()
     {
         string isbn = "2267046903";
-        Book livreFromWebService = new Book
+        Book bookFromWebService = new Book
         {
             Isbn = isbn,
-            Titre = "Le seigneur des anneaux T3 Le retour du roi",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.GrandFormat,
+            Title = "Le seigneur des anneaux T3 Le retour du roi",
+            Author = "J.R.R. Tolkien",
+            Publisher = "BOURGOIS",
+            Format = BookFormat.LargeFormat,
         };
 
-        _mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
-            .Returns(Task.FromResult(livreFromWebService));
+        _mockWebServiceClient.Setup(client => client.FindBookByIsbn(isbn))
+            .Returns(Task.FromResult(bookFromWebService));
 
-        _mockBookRepository.Setup(repo => repo.Save(livreFromWebService))
-            .Returns(Task.FromResult(livreFromWebService));
+        _mockBookRepository.Setup(repo => repo.Save(bookFromWebService))
+            .Returns(Task.FromResult(bookFromWebService));
 
-        Book result = await _bookWebService.CompleterLivreAvecWebService(isbn);
+        Book result = await _bookWebService.CompleteBookWithWebService(isbn);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(isbn, result.Isbn);
-        _mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
-        _mockBookRepository.Verify(repo => repo.Save(livreFromWebService), Times.Once);
+        _mockWebServiceClient.Verify(client => client.FindBookByIsbn(isbn), Times.Once);
+        _mockBookRepository.Verify(repo => repo.Save(bookFromWebService), Times.Once);
     }
 
     [TestMethod]
-    public async Task CompleterLivreAvecWebService_LivreNonTrouve_LanceException()
+    public async Task CompleteBookWithWebService_BookNotFound_ShouldThrowException()
     {
         string isbn = "2267046903";
 
-        _mockWebServiceClient.Setup(client => client.RechercherLivreParIsbn(isbn))
+        _mockWebServiceClient.Setup(client => client.FindBookByIsbn(isbn))
             .ReturnsAsync((Book)null); //Retourne null pour simuler l'absence du livre
 
         await Assert.ThrowsExceptionAsync<WebServiceDontFindBookByIsbn>(async () =>
         {
-            await _bookWebService.CompleterLivreAvecWebService(isbn);
+            await _bookWebService.CompleteBookWithWebService(isbn);
         });
 
-        _mockWebServiceClient.Verify(client => client.RechercherLivreParIsbn(isbn), Times.Once);
+        _mockWebServiceClient.Verify(client => client.FindBookByIsbn(isbn), Times.Once);
 
         _mockBookRepository.Verify(repo => repo.Save(It.IsAny<Book>()), Times.Never);
     }
 
     [TestMethod]
-    public async Task ModifierLivre_LivreExiste_ModifieEtSauvegardeLivre()
+    public async Task ModifyBook_BookExists_ShouldModifyAndSaveBook()
     {
         string isbn = "2267046903";
         Book existingBook = new Book
         {
             Isbn = isbn,
-            Titre = "Le seigneur des anneaux T3 Le retour du roi",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.Poche
+            Title = "Le seigneur des anneaux T3 Le retour du roi",
+            Author = "J.R.R. Tolkien",
+            Publisher = "BOURGOIS",
+            Format = BookFormat.Paperback
         };
 
         Book updatedBook = new Book
         {
             Isbn = isbn,
-            Titre = "Le seigneur des anneaux T3 La bataille pour la Terre du Milieu",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.GrandFormat
+            Title = "Le seigneur des anneaux T3 La bataille pour la Terre du Milieu",
+            Author = "J.R.R. Tolkien",
+            Publisher = "BOURGOIS",
+            Format = BookFormat.LargeFormat
         };
 
         _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
@@ -151,9 +151,9 @@ public class BookTest
         Book result = await _bookService.ModifyBook(updatedBook);
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(updatedBook.Titre, result.Titre);
-        Assert.AreEqual(updatedBook.Auteur, result.Auteur);
-        Assert.AreEqual(updatedBook.Editeur, result.Editeur);
+        Assert.AreEqual(updatedBook.Title, result.Title);
+        Assert.AreEqual(updatedBook.Author, result.Author);
+        Assert.AreEqual(updatedBook.Publisher, result.Publisher);
         Assert.AreEqual(updatedBook.Format, result.Format);
 
         _mockBookRepository.Verify(repo => repo.GetByIsbn(isbn), Times.Once);
@@ -178,16 +178,16 @@ public class BookTest
     // }
 
     [TestMethod]
-    public void SupprimerLivre_LivreExiste_SupprimeLeLivre()
+    public void DeleteBook_BookExists_ShouldDeleteBook()
     {
         string isbn = "2267046903";
         Book existingBook = new Book
         {
             Isbn = isbn,
-            Titre = "Le seigneur des anneaux T3 Le retour du roi",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.Broché
+            Title = "Le seigneur des anneaux T3 Le retour du roi",
+            Author = "J.R.R. Tolkien",
+            Publisher = "BOURGOIS",
+            Format = BookFormat.Hardcover
         };
 
         _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(existingBook);
@@ -200,7 +200,7 @@ public class BookTest
     }
 
     [TestMethod]
-    public void DeleteBook_LivreExistePas_LeveUneException()
+    public void DeleteBook_BookDoesNotExist_ShouldThrowException()
     {
         string isbn = "2267046903";
 
@@ -217,16 +217,16 @@ public class BookTest
     }
 
     [TestMethod]
-    public void SearchBooks_ParIsbn_RetourneLivre()
+    public void SearchBooks_ByIsbn_ShouldReturnBook()
     {
         string isbn = "2267046903";
         Book expectedBook = new Book
         {
             Isbn = isbn,
-            Titre = "Le seigneur des anneaux",
-            Auteur = "J.R.R. Tolkien",
-            Editeur = "BOURGOIS",
-            Format = BookFormat.Poche
+            Title = "Le seigneur des anneaux",
+            Author = "J.R.R. Tolkien",
+            Publisher = "BOURGOIS",
+            Format = BookFormat.Paperback
         };
 
         _mockBookRepository.Setup(repo => repo.GetByIsbn(isbn)).Returns(expectedBook);
@@ -241,7 +241,7 @@ public class BookTest
     }
 
     [TestMethod]
-    public void SearchBooks_ParTitre_RetourneLivres()
+    public void SearchBooks_ByTitle_ShouldReturnBooks()
     {
         string title = "Le seigneur des anneaux";
         List<Book> expectedBooks = new List<Book>
@@ -249,43 +249,43 @@ public class BookTest
             new Book
             {
                 Isbn = "2267046903",
-                Titre = title,
-                Auteur = "J.R.R. Tolkien",
-                Editeur = "BOURGOIS",
-                Format = BookFormat.Poche
+                Title = title,
+                Author = "J.R.R. Tolkien",
+                Publisher = "BOURGOIS",
+                Format = BookFormat.Paperback
             },
             new Book
             {
                 Isbn = "2267046904",
-                Titre = title,
-                Auteur = "J.R.R. Tolkien",
-                Editeur = "BOURGOIS",
-                Format = BookFormat.GrandFormat
+                Title = title,
+                Author = "J.R.R. Tolkien",
+                Publisher = "BOURGOIS",
+                Format = BookFormat.LargeFormat
             },
             new Book
             {
                 Isbn = "2267046904",
-                Titre = "Bilbo le Hobbit",
-                Auteur = "J.R.R. Tolkien",
-                Editeur = "BOURGOIS",
-                Format = BookFormat.GrandFormat
+                Title = "Bilbo le Hobbit",
+                Author = "J.R.R. Tolkien",
+                Publisher = "BOURGOIS",
+                Format = BookFormat.LargeFormat
             }
         };
 
         _mockBookRepository.Setup(repo => repo.GetByTitle(title))
-            .Returns(expectedBooks.Where(book => book.Titre == title).ToList());
+            .Returns(expectedBooks.Where(book => book.Title == title).ToList());
 
         IEnumerable<Book> result = _bookService.SearchBooks(title: title);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count()); //2 livres retournés
-        Assert.AreEqual(expectedBooks.First().Titre, result.First().Titre);
+        Assert.AreEqual(expectedBooks.First().Title, result.First().Title);
 
         _mockBookRepository.Verify(repo => repo.GetByTitle(title), Times.Once);
     }
 
     [TestMethod]
-    public void SearchBooks_ParAuteur_RetourneLivres()
+    public void SearchBooks_ByAuthor_ShouldReturnBooks()
     {
         string author = "J.R.R. Tolkien";
         List<Book> expectedBooks = new List<Book>
@@ -293,37 +293,37 @@ public class BookTest
             new Book
             {
                 Isbn = "2267046903",
-                Titre = "Le seigneur des anneaux",
-                Auteur = author,
-                Editeur = "BOURGOIS",
-                Format = BookFormat.Poche
+                Title = "Le seigneur des anneaux",
+                Author = author,
+                Publisher = "BOURGOIS",
+                Format = BookFormat.Paperback
             },
             new Book
             {
                 Isbn = "2267046904",
-                Titre = "Bilbo le Hobbit",
-                Auteur = author,
-                Editeur = "BOURGOIS",
-                Format = BookFormat.GrandFormat
+                Title = "Bilbo le Hobbit",
+                Author = author,
+                Publisher = "BOURGOIS",
+                Format = BookFormat.LargeFormat
             },
             new Book
             {
                 Isbn = "2267046904",
-                Titre = "Bilbo le Hobbit",
-                Auteur = "OwO",
-                Editeur = "BOURGOIS",
-                Format = BookFormat.GrandFormat
+                Title = "Bilbo le Hobbit",
+                Author = "OwO",
+                Publisher = "BOURGOIS",
+                Format = BookFormat.LargeFormat
             }
         };
 
         _mockBookRepository.Setup(repo => repo.GetByAuthor(author))
-            .Returns(expectedBooks.Where(book => book.Auteur == author).ToList());
+            .Returns(expectedBooks.Where(book => book.Author == author).ToList());
 
         IEnumerable<Book> result = _bookService.SearchBooks(author: author);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Count()); //2 livres retournés
-        Assert.AreEqual(expectedBooks.First().Auteur, result.First().Auteur);
+        Assert.AreEqual(expectedBooks.First().Author, result.First().Author);
 
         _mockBookRepository.Verify(repo => repo.GetByAuthor(author), Times.Once);
     }
@@ -334,7 +334,7 @@ public class BookTest
 #region ISBN 10
 
 [TestClass]
-public class ISBN10
+public class Isbn10Test
 {
     private Mock<IBookRepository> _mockBookRepository;
     private BookService _bookService;
@@ -362,9 +362,9 @@ public class ISBN10
     [DataRow("345550 3950")]
     [DataRow("2012 036961")]
     [DataRow("08 04429 57 X")]
-    public void whenIsbn10IsValid_shouldReturnTrue(string isbn)
+    public void GivenValidIsbn10_WhenChecked_ShouldReturnTrue(string isbn)
     {
-        bool result = _bookService.VerifierISBN(isbn);
+        bool result = _bookService.CheckISBN(isbn);
 
         Assert.IsTrue(result);
     }
@@ -374,9 +374,9 @@ public class ISBN10
     [DataRow("3455503959")]
     [DataRow("2012036968")]
     [DataRow("201203696X")]
-    public void whenIsbn10IsNotValid_shouldReturnFalse(string isbn)
+    public void GivenInvalidIsbn10_WhenChecked_ShouldReturnFalse(string isbn)
     {
-        bool result = _bookService.VerifierISBN(isbn);
+        bool result = _bookService.CheckISBN(isbn);
 
         Assert.IsFalse(result);
     }
@@ -384,26 +384,26 @@ public class ISBN10
     [DataTestMethod]
     [DataRow("297015470")]
     [DataRow("29701547081")]
-    public void whenIsbn10NotContains10Digits_shouldReturnIsbnLengthException(string isbn)
+    public void GivenIsbn10WithIncorrectLength_WhenChecked_ShouldThrowIsbnLengthException(string isbn)
     {
-        Assert.ThrowsException<IsbnLengthException>(() => _bookService.VerifierISBN(isbn));
+        Assert.ThrowsException<IsbnLengthException>(() => _bookService.CheckISBN(isbn));
     }
 
     [DataTestMethod]
     [DataRow("297R154701")]
     [DataRow("29d015g706")]
     [DataRow("A2901570q6")]
-    public void whenIsbn10ContainsLetter_shouldReturnIsbnFormatException(string isbn)
+    public void GivenIsbn10WithLetters_WhenChecked_ShouldThrowIsbnFormatException(string isbn)
     {
-        Assert.ThrowsException<IsbnFormatException>(() => _bookService.VerifierISBN(isbn));
+        Assert.ThrowsException<IsbnFormatException>(() => _bookService.CheckISBN(isbn));
     }
 
     [DataTestMethod]
     [DataRow("297015470R")]
     [DataRow("345550395j")]
-    public void whenIsbn10ContainsKeyLetter_shouldReturnIsbnKeyException(string isbn)
+    public void GivenIsbn10WithInvalidKeyLetter_WhenChecked_ShouldThrowIsbnKeyException(string isbn)
     {
-        Assert.ThrowsException<IsbnKeyException>(() => _bookService.VerifierISBN(isbn));
+        Assert.ThrowsException<IsbnKeyException>(() => _bookService.CheckISBN(isbn));
     }
 }
 

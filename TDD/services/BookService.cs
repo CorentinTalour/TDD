@@ -13,7 +13,7 @@ public class BookService
         _bookRepository = bookRepository;
     }
 
-    public bool VerifierISBN(string isbn)
+    public bool CheckISBN(string isbn)
     {
         if (isbn.Contains('-') || isbn.Contains(' '))
             isbn = isbn.Replace("-", "").Replace(" ", "");
@@ -21,42 +21,42 @@ public class BookService
         if (isbn.Length != 10)
             throw new IsbnLengthException();
 
-        int somme = 0;
+        int Sum = 0;
         for (int i = 0; i < 9; i++)
         {
             if (!char.IsDigit(isbn[i]))
                 throw new IsbnFormatException();
 
-            somme += (isbn[i] - '0') * (i + 1);
+            Sum += (isbn[i] - '0') * (i + 1);
         }
 
-        char dernierCaractere = isbn[9];
-        int dernierChiffre;
+        char lastCharacter = isbn[9];
+        int lastDigit;
 
-        if (dernierCaractere == 'X')
-            dernierChiffre = 10;
-        else if (char.IsDigit(dernierCaractere))
-            dernierChiffre = dernierCaractere - '0';
+        if (lastCharacter == 'X')
+            lastDigit = 10;
+        else if (char.IsDigit(lastCharacter))
+            lastDigit = lastCharacter - '0';
         else
             throw new IsbnKeyException();
 
-        somme += dernierChiffre * 10;
+        Sum += lastDigit * 10;
 
-        return somme % 11 == 0;
+        return Sum % 11 == 0;
     }
 
     public Book CreateBook(Book book)
     {
         if (string.IsNullOrWhiteSpace(book.Isbn) ||
-            string.IsNullOrWhiteSpace(book.Titre) ||
-            string.IsNullOrWhiteSpace(book.Auteur) ||
-            string.IsNullOrWhiteSpace(book.Editeur) ||
+            string.IsNullOrWhiteSpace(book.Title) ||
+            string.IsNullOrWhiteSpace(book.Author) ||
+            string.IsNullOrWhiteSpace(book.Publisher) ||
             !Enum.IsDefined(typeof(BookFormat), book.Format))
         {
             throw new BookArgumentException();
         }
 
-        book.Disponible = true;
+        book.Available = true;
         return _bookRepository.Add(book);
     }
 
@@ -69,9 +69,9 @@ public class BookService
             throw new BookNotFoundException();
         }
 
-        existingBook.Titre = updatedBook.Titre;
-        existingBook.Auteur = updatedBook.Auteur;
-        existingBook.Editeur = updatedBook.Editeur;
+        existingBook.Title = updatedBook.Title;
+        existingBook.Author = updatedBook.Author;
+        existingBook.Publisher = updatedBook.Publisher;
         existingBook.Format = updatedBook.Format;
 
         return await _bookRepository.Save(existingBook);
@@ -97,7 +97,7 @@ public class BookService
         {
             if (!string.IsNullOrEmpty(isbn))
             {
-                if (VerifierISBN(isbn))
+                if (CheckISBN(isbn))
                 {
                     Book book = _bookRepository.GetByIsbn(isbn);
                     if (book != null) return new List<Book> { book };

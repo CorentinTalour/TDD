@@ -6,52 +6,52 @@ namespace TDD.objects
     public class ReservationService
     {
         private readonly IReservationRepository _reservationRepository;
-        private readonly IAdherentRepository _adherentRepository;
+        private readonly IMemberRepository _memberRepository;
 
-        public ReservationService(IReservationRepository reservationRepository, IAdherentRepository adherentRepository)
+        public ReservationService(IReservationRepository reservationRepository, IMemberRepository memberRepository)
         {
             _reservationRepository = reservationRepository;
-            _adherentRepository = adherentRepository;
+            _memberRepository = memberRepository;
         }
 
-        public string AjouterReservation(Adherent adherent, DateTime dateLimite)
+        public string AddReservation(Member member, DateTime limitDate)
         {
-            if (adherent == null)
+            if (member == null)
                 throw new AdherentNotFoundException();
 
-            if (dateLimite < DateTime.Now || dateLimite > DateTime.Now.AddMonths(4))
+            if (limitDate < DateTime.Now || limitDate > DateTime.Now.AddMonths(4))
                 throw new InvalidReservationDateException();
 
             //Si l'adhérent a déjà 3 réservations ouvertes, on empêche l'ajout
-            if (_adherentRepository.GetReservationsOuvertes(adherent.CodeAdherent).Count >= 3)
+            if (_memberRepository.GetReservationsOuvertes(member.MemberCode).Count >= 3)
                 throw new ReservationLimitExceededException();
 
 
-            Reservation reservation = new Reservation(adherent, dateLimite);
+            Reservation reservation = new Reservation(member, limitDate);
             _reservationRepository.Add(reservation);
 
             return "Réservation ajoutée avec succès.";
         }
 
-        public List<Reservation> GetReservationsOuvertes()
+        public List<Reservation> GetOpenReservations()
         {
             return _reservationRepository.GetReservationsOuvertes();
         }
 
-        public void EnvoyerRappel(Adherent adherent)
+        public void SendReminder(Member member)
         {
-            List<Reservation> reservationsDepassees =
-                _adherentRepository.GetReservationsDepassees(adherent.CodeAdherent);
+            List<Reservation> overdueReservations =
+                _memberRepository.GetReservationsDepassees(member.MemberCode);
 
-            if (adherent == null)
+            if (member == null)
                 throw new AdherentNotFoundException();
 
-            if (reservationsDepassees.Any())
+            if (overdueReservations.Any())
             {
                 //Simule l'envoi d'un email (ici simplement un log console pour le test)
                 Console.WriteLine(
                     $"Envoi d'un rappel pour les réservations suivantes : {string.Join(", ",
-                        reservationsDepassees.Select(r => r.CodeReservation))}");
+                        overdueReservations.Select(r => r.ReservationCode))}");
             }
         }
     }

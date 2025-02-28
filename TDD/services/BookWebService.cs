@@ -15,9 +15,9 @@ public class BookWebService
         _bookWebService = bookWebService;
     }
 
-    public async Task<Book> CompleterLivreAvecWebService(string isbn)
+    public async Task<Book> CompleteBookWithWebService(string isbn)
     {
-        Book bookFind = await _bookWebService.RechercherLivreParIsbn(isbn);
+        Book bookFind = await _bookWebService.FindBookByIsbn(isbn);
         if (bookFind == null)
         {
             throw new WebServiceDontFindBookByIsbn();
