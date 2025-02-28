@@ -41,18 +41,22 @@ namespace TDD.services
 
         public void SendReminder(Member member)
         {
-            List<Reservation> overdueReservations =
-                _memberRepository.GetReservationsDepassees(member.MemberCode);
-
             if (member == null)
                 throw new MemberNotFoundException();
 
-            if (overdueReservations.Any())
+            List<Reservation> overdueReservations =
+                _memberRepository.GetReservationsDepassees(member.MemberCode);
+
+            List<Reservation> overdueForFourMonths = overdueReservations
+                .Where(r => r.ReservationDate < DateTime.Now.AddMonths(-4))
+                .ToList();
+
+            if (overdueForFourMonths.Any())
             {
                 //Simule l'envoi d'un email (ici simplement un log console pour le test)
                 Console.WriteLine(
                     $"Envoi d'un rappel pour les réservations suivantes : {string.Join(", ",
-                        overdueReservations.Select(r => r.ReservationCode))}");
+                        overdueForFourMonths.Select(r => r.ReservationCode))}");
             }
         }
     }
