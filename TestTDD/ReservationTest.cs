@@ -66,22 +66,30 @@ public class ReservationTest
     {
         Member member = new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
-        List<Reservation> reservationsDepassees = new List<Reservation>
+        // La réservation doit être en retard de **plus de 4 mois**
+        List<Reservation> overdueReservations = new List<Reservation>
         {
-            new Reservation(member, DateTime.Now.AddMonths(-5)) { ReservationCode = "RES001" }
+            new Reservation(member, DateTime.Now.AddMonths(-5).Date)
+                { ReservationCode = "RES001" }
         };
 
         _mockAdherentRepository?.Setup(repo => repo.GetReservationsDepassees(member.MemberCode))
-            .Returns(reservationsDepassees);
+            .Returns(overdueReservations);
 
-        //Capture la sortie console
+        // Capture la sortie console pour vérifier l'envoi de l'email
         StringWriter output = new StringWriter();
         Console.SetOut(output);
 
+        Console.WriteLine($"Test - Nombre de réservations dépassées : {overdueReservations.Count}");
+        Console.WriteLine(
+            $"Test - Dates des réservations : {string.Join(", ", overdueReservations.Select(r => r.ReservationDate))}");
+
+        // Appel de la méthode pour envoyer le rappel
         _reservationService?.SendReminder(member);
 
         string consoleOutput = output.ToString();
 
+        // Vérification du message attendu
         Assert.IsTrue(consoleOutput.Contains("Envoi d'un rappel pour les réservations suivantes : RES001"));
     }
 
@@ -90,17 +98,15 @@ public class ReservationTest
     {
         Member member = new Member("A123", "John", "Doe", DateTime.Now, Civilite.Monsieur);
 
-        List<Reservation> reservationsDepassees = new List<Reservation>
+        List<Reservation> overdueReservations = new List<Reservation>
         {
-            new Reservation(member, DateTime.Now.AddMonths(-3)) { ReservationCode = "RES002" }
+            new Reservation(member, DateTime.Now.AddMonths(-5)) { ReservationCode = "RES002" }
         };
 
         _mockAdherentRepository?.Setup(repo => repo.GetReservationsDepassees(member.MemberCode))
-            .Returns(reservationsDepassees);
+            .Returns(overdueReservations);
 
-        //Capture la sortie console
         StringWriter output = new StringWriter();
-        Console.SetOut(output);
 
         _reservationService?.SendReminder(member);
 

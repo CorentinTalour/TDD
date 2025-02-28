@@ -44,16 +44,15 @@ namespace TDD.services
             if (member == null)
                 throw new MemberNotFoundException();
 
-            List<Reservation> overdueReservations =
-                _memberRepository.GetReservationsDepassees(member.MemberCode);
+            List<Reservation> overdueReservations = _memberRepository.GetReservationsDepassees(member.MemberCode);
 
+            // 🛠 Filtre uniquement les réservations ayant plus de 4 mois de retard
             List<Reservation> overdueForFourMonths = overdueReservations
-                .Where(r => r.ReservationDate < DateTime.Now.AddMonths(-4))
+                .Where(r => r.ReservationDate <= DateTime.Now.AddMonths(-4))
                 .ToList();
 
             if (overdueForFourMonths.Any())
             {
-                //Simule l'envoi d'un email (ici simplement un log console pour le test)
                 Console.WriteLine(
                     $"Envoi d'un rappel pour les réservations suivantes : {string.Join(", ",
                         overdueForFourMonths.Select(r => r.ReservationCode))}");
